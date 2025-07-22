@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Account - KAIRA</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    .order-box {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+    }
+    .status {
+      font-weight: bold;
+    }
+    .status.shipped {
+      color: green;
+    }
+    .status.pending {
+      color: orange;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
+  <a class="navbar-brand" href="index.html">KAIRA</a>
+  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+    <ul class="navbar-nav">
+      <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+      <li class="nav-item"><a class="nav-link" href="men-section.html">Men</a></li>
+      <li class="nav-item"><a class="nav-link" href="women-section.html">Women</a></li>
+      <li class="nav-item"><a class="nav-link" href="accessories.html">Accessories</a></li>
+      <li class="nav-item"><a class="nav-link" href="cart.html">Cart</a></li>
+      <li class="nav-item"><a class="nav-link" href="checkout.html">Checkout</a></li>
+      <li class="nav-item"><a class="nav-link active" href="#">My Account</a></li>
+      <li class="nav-item"><a class="nav-link" href="#" onclick="logout()">Logout</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- My Account Content -->
+<div class="container mt-5 mb-5">
+  <h2 id="welcomeUser" class="text-center mb-4">Welcome, User</h2>
+  <h4 class="mb-3">Your Order History</h4>
+  <div id="orders"></div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-dark text-white text-center py-3 mt-5">
+  <p>&copy; 2025 KAIRA | My Account</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  window.onload = () => {
+    const user = JSON.parse(localStorage.getItem("loggedInUser"));
+    if (!user) {
+      alert("Please log in first.");
+      window.location.href = "login.html";
+      return;
+    }
+
+    document.getElementById("welcomeUser").textContent = `Welcome, ${user.name}`;
+    const orders = JSON.parse(localStorage.getItem("orderHistory")) || [];
+    const ordersContainer = document.getElementById("orders");
+
+    if (orders.length === 0) {
+      ordersContainer.innerHTML = '<p class="text-muted">You have not placed any orders yet.</p>';
+    } else {
+      orders.forEach((order, index) => {
+        const orderDiv = document.createElement("div");
+        orderDiv.className = "order-box";
+
+        // Check if order is object or old string type
+        if (typeof order === "string") {
+          orderDiv.innerHTML = `
+            <h5>Order #${index + 1}</h5>
+            <p>${order}</p>
+            <p class="status pending">Status: Unknown (Old Format)</p>
+          `;
+        } else {
+          const itemsList = order.items?.map(item =>
+            `<li>${item.item} - ₹${item.price} x ${item.qty}</li>`
+          ).join("") || "<li>No items</li>";
+
+          orderDiv.innerHTML = `
+            <h5>Order #${index + 1}</h5>
+            <ul>${itemsList}</ul>
+            <p><strong>Address:</strong> ${order.name}, ${order.address}, ${order.city} - ${order.pincode}</p>
+            <p><strong>Payment Method:</strong> ${order.paymentMethod}</p>
+            <p><strong>Date:</strong> ${order.date || "Not available"}</p>
+            <p class="status ${order.shipped ? 'shipped' : 'pending'}">
+              Status: ${order.shipped ? 'Shipped' : 'Pending'}
+            </p>
+          `;
+        }
+
+        ordersContainer.appendChild(orderDiv);
+      });
+    }
+  };
+
+  function logout() {
+    localStorage.removeItem("loggedInUser");
+    window.location.href = "login.html";
+  }
+</script>
+</body>
+</html>
